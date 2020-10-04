@@ -1,7 +1,7 @@
 from sqlalchemy import Float, Column, ForeignKey, Integer, String
 from sqlalchemy.orm import relationship
 
-from .database import Base
+from database import Base
 
 
 class User(Base):
@@ -28,7 +28,7 @@ class Purchase(Base):
     cost = Column(Integer, nullable=False)
 
     user = relationship("User", back_populates="purchases")
-    movie_list = relationship("MovieList", back_populates="receipt")
+    movie_list = relationship("Movie", secondary="MoviesLists", back_populates="purchase")
 
 
 class MovieList(Base):
@@ -36,9 +36,6 @@ class MovieList(Base):
 
     purchase_id = Column(Integer, ForeignKey("Purchases.ID"), primary_key=True)
     movie_id = Column(Integer, ForeignKey("Movies.ID"), primary_key=True)
-
-    receipt = relationship("Purchase", back_populates="movie_list")
-    movie = relationship("Movie", back_populates="movie_list")
 
 
 class Movie(Base):
@@ -52,4 +49,4 @@ class Movie(Base):
     rating = Column(Float)
     cost_per_day = Column(Integer, nullable=False)
 
-    movie_list = relationship("MovieList", back_populates="movie")
+    purchase = relationship("Purchase", secondary="MoviesLists", back_populates="movie_list")
