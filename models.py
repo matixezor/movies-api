@@ -42,7 +42,7 @@ class Movie(Base):
     __tablename__ = "Movies"
 
     ID = Column(Integer, primary_key=True)
-    title = Column(String, unique=True, index=True, nullable=False)
+    title = Column(String, unique=True, nullable=False)
     director = Column(String)
     release_year = Column(Integer)
     genre = Column(String, nullable=False)

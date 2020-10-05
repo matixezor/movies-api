@@ -3,10 +3,15 @@ from pydantic import BaseModel
 
 
 class MovieBase(BaseModel):
+    ID: int
     title: str
 
     class Config:
         orm_mode = True
+
+
+class MoviePurchase(MovieBase):
+    cost_per_day: int
 
 
 class Movie(MovieBase):
@@ -14,7 +19,6 @@ class Movie(MovieBase):
     director: Optional[str] = None
     release_year: Optional[str] = None
     rating: float
-    cost_per_day: int
 
 
 class PurchaseBase(BaseModel):
@@ -28,7 +32,7 @@ class PurchaseBase(BaseModel):
 
 
 class Purchase(PurchaseBase):
-    movie_list: List[Movie] = []
+    movie_list: List[MoviePurchase] = []
 
 
 class UserBase(BaseModel):

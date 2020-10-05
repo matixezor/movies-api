@@ -1,49 +1,41 @@
-from fastapi import APIRouter, HTTPException, Depends, status, Path
-
 from typing import List
 
+from fastapi import APIRouter, HTTPException, Depends, status, Path
 from sqlalchemy.orm import Session
 
-import crud, models, schemas
-from database import SessionLocal
+import crud
+from schemas import User, UserBase, Movie, Purchase, UserPurchase
+from utils import get_db
 
 router = APIRouter()
 
 
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
-
-
-def get_user(user_id: int = Path(..., ge=1), db: Session = Depends(get_db)) -> schemas.User:
+def get_user(user_id: int = Path(..., ge=1), db: Session = Depends(get_db)) -> User:
     db_user = crud.get_user(db, user_id=user_id)
     if not db_user:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
     return db_user
 
 
-@router.get("/{user_id}", summary="Read User information", response_model=schemas.User, status_code=status.HTTP_200_OK)
-def read_user(user: schemas.User = Depends(get_user)):
+@router.get("/{user_id}", summary="Read User information", response_model=User, status_code=status.HTTP_200_OK)
+def read_user(user: User = Depends(get_user)):
     return user
 
 
 @router.get(
     "/{user_id}/purchases",
     summary="Read User purchases",
-    response_model=schemas.UserPurchase,
+    response_model=UserPurchase,
     status_code=status.HTTP_200_OK
 )
-def read_user_purchases(user: schemas.UserBase = Depends(get_user)):
+def read_user_purchases(user: UserBase = Depends(get_user)):
     return user
 
 
 @router.get(
     "/{user_id}/purchases/{purchase_id}",
     summary="Read User purchase with movies",
-    response_model=schemas.Purchase,
+    response_model=Purchase,
     status_code=status.HTTP_200_OK,
     dependencies=[Depends(get_user)]
 )
@@ -59,9 +51,9 @@ def read_user_purchase_movies(purchase_id: int = Path(..., ge=1), db: Session = 
 @router.get(
     "/{user_id}/movies",
     summary="Read User movies",
-    response_model=List[schemas.Movie],
+    response_model=List[Movie],
     status_code=status.HTTP_200_OK
 )
-def read_user_movies(user: schemas.UserBase = Depends(get_user), db: Session = Depends(get_db)):
-    db_movies = crud.get_user_movies(db, user_id=user.ID)
-    return db_movies
+def read_user_movies(user: UserBase = Depends(get_user), db: Session = Depends(get_db)):
+    return crud.get_user_movies(db, user_id=user.ID)
+
