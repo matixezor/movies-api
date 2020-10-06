@@ -1,30 +1,32 @@
+from datetime import datetime, date
 from typing import Optional, List
 from pydantic import BaseModel
 
 
 class MovieBase(BaseModel):
-    ID: int
     title: str
+    genre: str
+    director: Optional[str] = None
+    release_year: Optional[int] = None
+    rating: float
+    cost_per_day: int
 
     class Config:
         orm_mode = True
 
 
-class MoviePurchase(MovieBase):
-    cost_per_day: int
+class MovieCreate(MovieBase):
+    pass
 
 
 class Movie(MovieBase):
-    genre: str
-    director: Optional[str] = None
-    release_year: Optional[str] = None
-    rating: float
+    ID: int
 
 
 class PurchaseBase(BaseModel):
     ID: int
-    start_date: str
-    expiry_date: str
+    start_date: date
+    expiry_date: date
     cost: int
 
     class Config:
@@ -32,7 +34,7 @@ class PurchaseBase(BaseModel):
 
 
 class Purchase(PurchaseBase):
-    movie_list: List[MoviePurchase] = []
+    movie_list: List[MovieBase] = []
 
 
 class UserBase(BaseModel):
@@ -49,7 +51,17 @@ class User(UserBase):
     email: str
     phone: Optional[str] = None
     address: Optional[str] = None
+    is_admin: bool
 
 
 class UserPurchase(UserBase):
     purchases: List[PurchaseBase] = []
+
+
+class Token(BaseModel):
+    access_token: str
+    token_type: str
+
+
+class TokenData(BaseModel):
+    email: Optional[str] = None
