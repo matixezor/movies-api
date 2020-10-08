@@ -1,4 +1,6 @@
 from sqlalchemy.orm import Session
+from sqlalchemy import cast, Date
+from datetime import date
 
 from typing import List
 
@@ -22,7 +24,7 @@ def get_user_movies(db: Session, user_id: int):
     return db.query(models.Movie).\
         join(models.MovieList).\
         join(models.Purchase).\
-        filter(models.Purchase.user_id == user_id).all()
+        filter(models.Purchase.user_id == user_id, cast(models.Purchase.expiry_date, Date) <= date.today()).all()
 
 
 def get_purchase_movies(db: Session, purchase_id: int):
@@ -36,11 +38,16 @@ def get_purchase(db: Session, purchase_id: int):
     return db.query(models.Purchase).filter(models.Purchase.ID == purchase_id).first()
 
 
+def get_purchase_with_user_id(db: Session, purchase_id: int, user_id: int):
+    return db.query(models.Purchase). \
+        filter(models.Purchase.ID == purchase_id, models.Purchase.user_id == user_id).first()
+
+
 def get_movies(db: Session, skip: int, limit: int):
     return db.query(models.Movie).offset(skip).limit(limit).all()
 
 
-def create_movies(db:Session, movies: List[Movie]):
+def create_movies(db: Session, movies: List[Movie]):
     db_movies = [models.Movie(**movie.dict()) for movie in movies]
     db.add_all(db_movies)
     db.commit()

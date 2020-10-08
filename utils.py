@@ -1,15 +1,17 @@
-from fastapi import Depends, HTTPException, status
-from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
+from fastapi import Depends, HTTPException, status, Path
+from fastapi.security import OAuth2PasswordBearer
 from database import SessionLocal
 from jose import JWTError, jwt
 from datetime import datetime, timedelta
 from typing import Optional
 import crud
-from config import SECRET_KEY, ALGORITHM, ACCESS_TOKEN_EXPIRE_MINUTES
-from schemas import Token, TokenData
+from config import SECRET_KEY, ALGORITHM
+from schemas import TokenData, User
 from passlib.context import CryptContext
 from sqlalchemy.orm import Session
 
+
+admin_text_desc = 'Only for admin users'
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
@@ -70,3 +72,17 @@ async def get_current_user(token: str = Depends(oauth2_scheme), db: Session = De
     if user is None:
         raise credentials_exception
     return user
+
+
+def get_admin(user: User = Depends(get_current_user)):
+    if user.is_admin:
+        return True
+    else:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail='Insufficient permissions ')
+
+
+def get_user(user_id: int = Path(..., ge=1), db: Session = Depends(get_db)) -> User:
+    db_user = crud.get_user(db, user_id=user_id)
+    if not db_user:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='User not found')
+    return db_user

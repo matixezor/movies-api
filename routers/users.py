@@ -5,24 +5,71 @@ from sqlalchemy.orm import Session
 
 import crud
 from schemas import User, UserBase, Movie, Purchase, UserPurchase
-from utils import get_db
+from utils import get_db, get_admin, get_current_user, admin_text_desc, get_user
 
 router = APIRouter()
 
 
-def get_user(user_id: int = Path(..., ge=1), db: Session = Depends(get_db)) -> User:
-    db_user = crud.get_user(db, user_id=user_id)
-    if not db_user:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='User not found')
-    return db_user
+@router.get('/me', summary='Read info of yourself', response_model=User, status_code=status.HTTP_200_OK)
+def read_self_user(user: User = Depends(get_current_user)):
+    return user
 
 
-@router.get('/', summary='Read users', response_model=List[User], status_code=status.HTTP_200_OK)
+@router.get(
+    '/me/purchases',
+    summary='Read info about your purchases',
+    response_model=UserPurchase,
+    status_code=status.HTTP_200_OK
+)
+def read_self_purchases(user: User = Depends(get_current_user)):
+    return user
+
+
+@router.get(
+    '/me/purchases/{purchase_id}',
+    summary='Read full info about your purchase',
+    response_model=Purchase,
+    status_code=status.HTTP_200_OK
+)
+def read_self_purchase(
+        purchase_id: int = Path(..., ge=1),
+        user: User = Depends(get_current_user),
+        db: Session = Depends(get_db)
+):
+    db_purchase = crud.get_purchase_with_user_id(db, purchase_id=purchase_id, user_id=user.ID)
+    if not db_purchase:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='Purchase not found')
+    return db_purchase
+
+
+@router.get('/me/movies', summary='Read your movies', response_model=List[Movie], status_code=status.HTTP_200_OK)
+def read_self_movies(user: UserBase = Depends(get_current_user), db: Session = Depends(get_db)):
+    db_movies = crud.get_user_movies(db, user_id=user.ID)
+    if not db_movies:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='User movies not found')
+    return db_movies
+
+
+@router.get(
+    '/',
+    summary='Read users',
+    response_model=List[User],
+    status_code=status.HTTP_200_OK,
+    dependencies=[Depends(get_admin)],
+    description=admin_text_desc
+)
 def read_users(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
     return crud.get_users(db, skip=skip, limit=limit)
 
 
-@router.get('/{user_id}', summary='Read User information', response_model=User, status_code=status.HTTP_200_OK)
+@router.get(
+    '/{user_id}',
+    summary='Read User information',
+    response_model=User,
+    status_code=status.HTTP_200_OK,
+    dependencies=[Depends(get_admin)],
+    description=admin_text_desc
+)
 def read_user(user: User = Depends(get_user)):
     return user
 
@@ -31,7 +78,9 @@ def read_user(user: User = Depends(get_user)):
     '/{user_id}/purchases',
     summary='Read User purchases',
     response_model=UserPurchase,
-    status_code=status.HTTP_200_OK
+    status_code=status.HTTP_200_OK,
+    dependencies=[Depends(get_admin)],
+    description=admin_text_desc
 )
 def read_user_purchases(user: UserBase = Depends(get_user)):
     return user
@@ -39,17 +88,20 @@ def read_user_purchases(user: UserBase = Depends(get_user)):
 
 @router.get(
     '/{user_id}/purchases/{purchase_id}',
-    summary='Read User purchase with movies',
+    summary='Read User purchase with full info',
     response_model=Purchase,
     status_code=status.HTTP_200_OK,
-    dependencies=[Depends(get_user)]
+    dependencies=[Depends(get_admin)],
+    description=admin_text_desc
 )
-def read_user_purchase_movies(purchase_id: int = Path(..., ge=1), db: Session = Depends(get_db)):
-    db_purchase = crud.get_purchase(db, purchase_id=purchase_id)
+def read_user_purchase(
+        user_id: int = Path(..., ge=1),
+        purchase_id: int = Path(..., ge=1),
+        db: Session = Depends(get_db)
+):
+    db_purchase = crud.get_purchase_with_user_id(db, purchase_id=purchase_id, user_id=user_id)
     if not db_purchase:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='Purchase not found')
-    db_purchase_movies = crud.get_purchase_movies(db, purchase_id=purchase_id)
-    db_purchase.movie_list = db_purchase_movies
     return db_purchase
 
 
@@ -57,8 +109,12 @@ def read_user_purchase_movies(purchase_id: int = Path(..., ge=1), db: Session = 
     '/{user_id}/movies',
     summary='Read User movies',
     response_model=List[Movie],
-    status_code=status.HTTP_200_OK
+    status_code=status.HTTP_200_OK,
+    dependencies=[Depends(get_admin)],
+    description=admin_text_desc
 )
 def read_user_movies(user: UserBase = Depends(get_user), db: Session = Depends(get_db)):
-    return crud.get_user_movies(db, user_id=user.ID)
-
+    db_movies = crud.get_user_movies(db, user_id=user.ID)
+    if not db_movies:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='User movies not found')
+    return db_movies

@@ -1,20 +1,12 @@
 from fastapi import APIRouter, Depends, status, Path, HTTPException
 from typing import List
-from schemas import Movie, MovieCreate, User
+from schemas import Movie, MovieCreate
 
-from utils import get_current_user
 from sqlalchemy.orm import Session
 import crud
-from utils import get_db
+from utils import get_db, get_admin
 
 router = APIRouter()
-
-
-def get_admin(user: User = Depends(get_current_user)):
-    if user.is_admin:
-        return True
-    else:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail='Insufficient permissions ')
 
 
 @router.get('/', response_model=List[Movie], summary='Read movies', status_code=status.HTTP_200_OK)
@@ -30,6 +22,9 @@ def read_movies(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
     dependencies=[Depends(get_admin)]
 )
 def create_movies(movies: List[MovieCreate], db: Session = Depends(get_db)):
+    """
+    Only for admin users!
+    """
     return crud.create_movies(db, movies=movies)
 
 
