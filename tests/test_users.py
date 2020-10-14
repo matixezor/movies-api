@@ -242,7 +242,7 @@ def test_read_user():
                             }
 
 
-def test_read_user_bad_id():
+def test_read_nonexistent_user():
     response = client.get('/users/3', headers=admin_token)
     assert response.status_code == 404
     assert response.json() == {'detail': 'User not found'}
@@ -258,3 +258,108 @@ def test_read_user_insufficient_permission():
     response = client.get('/users/1', headers=token)
     assert response.status_code == 403
     assert response.json() == {'detail': 'Insufficient permissions'}
+
+
+def test_read_user_purchases():
+    response = client.get('/users/1/purchases', headers=admin_token)
+    assert response.status_code == 200
+    assert response.json() == {
+                                'ID': 1,
+                                'email': 'test_mail',
+                                'purchases': [
+                                    {
+                                        'ID': 1,
+                                        'start_date': '2020-10-03',
+                                        'expiry_date': '2020-10-09',
+                                        'cost': 66
+                                    },
+                                    {
+                                        'ID': 2, 'start_date': '2020-10-14', 'expiry_date': '2020-11-15', 'cost': 198
+                                    }
+                                ]
+                            }
+
+
+def test_read_nonexistent_user_purchases():
+    response = client.get('/users/3/purchases', headers=admin_token)
+    assert response.status_code == 404
+    assert response.json() == {'detail': 'User not found'}
+
+
+def test_read_user_id_le_one():
+    response = client.get('/users/0/purchases', headers=admin_token)
+    assert response.status_code == 422
+    assert response.json() == {
+                                'detail':
+                                    [
+                                        {
+                                            'loc': ['path', 'user_id'],
+                                            'msg': 'ensure this value is greater than or equal to 1',
+                                            'type': 'value_error.number.not_ge',
+                                            'ctx': {'limit_value': 1}
+                                        }
+                                    ]
+                            }
+
+
+def test_read_user_purchase():
+    response = client.get('/users/1/purchases/1', headers=admin_token)
+    assert response.status_code == 200
+    assert response.json() == {
+                                'ID': 1,
+                                'start_date': '2020-10-03',
+                                'expiry_date': '2020-10-09',
+                                'cost': 66,
+                                'movie_list': [
+                                    {
+                                        'title': 'Project Power',
+                                        'genre': 'Fantasy',
+                                        'director': 'Henry Joost',
+                                        'release_year': 2020,
+                                        'rating': 6.0,
+                                        'cost_per_day': 5
+                                    },
+                                    {
+                                        'title': '#Alive',
+                                        'genre': 'Horror',
+                                        'director': 'Il Cho',
+                                        'release_year': 2020,
+                                        'rating': 6.2,
+                                        'cost_per_day': 6
+                                    }
+                                ]
+                            }
+
+
+def test_read_nonexistent_user_purchase():
+    response = client.get('/users/5/purchases/1', headers=admin_token)
+    assert response.status_code == 404
+    assert response.json() == {'detail': 'Purchase for given user not found'}
+
+
+def test_read_user_nonexistent_purchase():
+    response = client.get('/users/2/purchases/1', headers=admin_token)
+    assert response.status_code == 404
+    assert response.json() == {'detail': 'Purchase for given user not found'}
+
+
+def test_read_user_movies():
+    response = client.get('/users/2/movies', headers=admin_token)
+    assert response.status_code == 200
+    assert response.json() == [
+                                {
+                                    'title': '#Alive',
+                                    'genre': 'Horror',
+                                    'director': 'Il Cho',
+                                    'release_year': 2020,
+                                    'rating': 6.2,
+                                    'cost_per_day': 6,
+                                    'ID': 3
+                                }
+                            ]
+
+
+def test_read_nonexistent_user_movies():
+    response = client.get('/users/3/movies', headers=admin_token)
+    assert response.status_code == 404
+    assert response.json() == {'detail': 'User not found'}
