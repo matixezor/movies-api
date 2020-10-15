@@ -1,4 +1,4 @@
-from datetime import datetime, date
+from datetime import date
 from typing import Optional, List
 from pydantic import BaseModel
 
@@ -21,6 +21,10 @@ class MovieCreate(MovieBase):
 
 class Movie(MovieBase):
     ID: int
+
+
+class UserMovie(Movie):
+    expired: Optional[bool] = None
 
 
 class PurchaseBase(BaseModel):
@@ -48,7 +52,6 @@ class UserBase(BaseModel):
 class User(UserBase):
     name: str
     surname: str
-    email: str
     phone: Optional[str] = None
     address: Optional[str] = None
     is_admin: bool
