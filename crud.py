@@ -5,7 +5,7 @@ from datetime import date
 from typing import List
 
 import models
-from schemas import Movie
+from schemas import Movie, MovieBase
 
 
 def get_users(db: Session, skip: int, limit: int):
@@ -24,7 +24,7 @@ def get_user_movies(db: Session, user_id: int):
     return db.query(models.Movie).\
         join(models.MovieList).\
         join(models.Purchase).\
-        filter(models.Purchase.user_id == user_id, cast(models.Purchase.expiry_date, Date) <= date.today()).all()
+        filter(models.Purchase.user_id == user_id).all()
 
 
 def get_purchase_movies(db: Session, purchase_id: int):
@@ -58,3 +58,9 @@ def create_movies(db: Session, movies: List[Movie]):
 
 def get_movie(db: Session, movie_id: int):
     return db.query(models.Movie).filter(models.Movie.ID == movie_id).first()
+
+
+def update_movie(db: Session, movie_id: int, movie: MovieBase):
+    db.query(models.Movie).filter(models.Movie.ID == movie_id).update(movie.dict(), synchronize_session=False)
+    db.commit()
+    return get_movie(db, movie_id=movie_id)
