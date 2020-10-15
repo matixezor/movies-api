@@ -1,38 +1,18 @@
 from fastapi.testclient import TestClient
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
+
+from .test_utils import override_get_db, get_token
 
 from config import test_admin_password, test_admin_username, test_password, test_username
 from main import app
 from utils import get_db
 
-SQLALCHEMY_DATABASE_URL = "sqlite:///./tests/test_database.db"
-
-engine = create_engine(
-    SQLALCHEMY_DATABASE_URL, connect_args={"check_same_thread": False}
-)
-TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
-
-
-def override_get_db():
-    try:
-        db = TestingSessionLocal()
-        yield db
-    finally:
-        db.close()
-
-
-def get_token(username, password):
-    response = client.post('/token', data={'username': username, 'password': password})
-    response = response.json()
-    return {'Authorization': f"Bearer {response['access_token']}"}
-
 
 app.dependency_overrides[get_db] = override_get_db
 
 client = TestClient(app)
-admin_token = get_token(test_admin_username, test_admin_password)
-token = get_token(test_username, test_password)
+
+admin_token = get_token(test_admin_username, test_admin_password, client)
+token = get_token(test_username, test_password, client)
 
 
 def test_read_self_user():
