@@ -50,4 +50,4 @@ class Movie(Base):
     rating = Column(Float)
     cost_per_day = Column(Integer, nullable=False)
 
-    purchase = relationship("Purchase", secondary="MoviesLists", back_populates="movie_list")
+    purchase = relationship("Purchase", secondary="MoviesLists", back_populates="movie_list", uselist=False)
