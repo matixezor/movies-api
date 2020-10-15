@@ -1,11 +1,12 @@
 from typing import List
+from datetime import date
 
 from fastapi import APIRouter, HTTPException, Depends, status, Path
 from sqlalchemy.orm import Session
 
 import crud
-from schemas import User, UserBase, Movie, Purchase, UserPurchase
-from utils import get_db, get_admin, get_current_user, admin_text_desc, get_user
+from schemas import User, UserBase, Movie, Purchase, UserPurchase, UserMovie
+from utils import get_db, get_admin, get_current_user, admin_text_desc, get_user, get_password_hash
 
 router = APIRouter()
 
@@ -42,11 +43,14 @@ def read_self_purchase(
     return db_purchase
 
 
-@router.get('/me/movies', summary='Read your movies', response_model=List[Movie], status_code=status.HTTP_200_OK)
+@router.get('/me/movies', summary='Read your movies', response_model=List[UserMovie], status_code=status.HTTP_200_OK)
 def read_self_movies(user: UserBase = Depends(get_current_user), db: Session = Depends(get_db)):
     db_movies = crud.get_user_movies(db, user_id=user.ID)
     if not db_movies:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='User movies not found')
+    for movie in db_movies:
+        year, month, day = (int(x) for x in movie.purchase.expiry_date.split('-'))
+        movie.expired = True if date(year, month, day) < date.today() else False
     return db_movies
 
 
@@ -101,7 +105,7 @@ def read_user_purchase(
 ):
     db_purchase = crud.get_purchase_with_user_id(db, purchase_id=purchase_id, user_id=user_id)
     if not db_purchase:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='Purchase not found')
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='Purchase for given user not found')
     return db_purchase
 
 
@@ -116,5 +120,5 @@ def read_user_purchase(
 def read_user_movies(user: UserBase = Depends(get_user), db: Session = Depends(get_db)):
     db_movies = crud.get_user_movies(db, user_id=user.ID)
     if not db_movies:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='User movies not found')
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='Movies not found')
     return db_movies
