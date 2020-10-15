@@ -78,7 +78,7 @@ def get_admin(user: User = Depends(get_current_user)):
     if user.is_admin:
         return True
     else:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail='Insufficient permissions ')
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail='Insufficient permissions')
 
 
 def get_user(user_id: int = Path(..., ge=1), db: Session = Depends(get_db)) -> User:
