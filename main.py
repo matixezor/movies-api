@@ -1,14 +1,12 @@
-from datetime import timedelta
 from fastapi import FastAPI, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
-import uvicorn
-
-from routers import users, movies
-from config import ACCESS_TOKEN_EXPIRE_MINUTES
 from sqlalchemy.orm import Session
-from schemas import Token
+from datetime import timedelta
 
-from utils import get_db, authenticate_user, create_access_token, get_current_user
+from routers import users, movies, me
+from config import ACCESS_TOKEN_EXPIRE_MINUTES
+from schemas import Token
+from utils import get_db, authenticate_user, create_access_token, get_current_user, get_admin
 
 
 app = FastAPI()
@@ -27,15 +25,15 @@ async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(
             detail='Incorrect email or password',
             headers={'WWW-Authenticate': "Bearer"},
         )
+
     access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = create_access_token(
         data={'sub': user.email}, expires_delta=access_token_expires
     )
+
     return {'access_token': access_token, 'token_type': 'bearer'}
 
 
-app.include_router(users.router, prefix='/users', tags=['users'], dependencies=[Depends(get_current_user)])
+app.include_router(me.router, prefix='/me', tags=['me'], dependencies=[Depends(get_current_user)])
+app.include_router(users.router, prefix='/users', tags=['users'], dependencies=[Depends(get_admin)])
 app.include_router(movies.router, prefix='/movies', tags=['movies'])
-
-if __name__ == '__main__':
-    uvicorn.run(app, host="0.0.0.0", port=8000)
