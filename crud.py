@@ -1,11 +1,8 @@
 from sqlalchemy.orm import Session
-from sqlalchemy import cast, Date
-from datetime import date
-
 from typing import List
 
 import models
-from schemas import Movie, MovieBase
+from schemas import MovieCreate, MovieBase
 
 
 def get_users(db: Session, skip: int, limit: int):
@@ -47,7 +44,7 @@ def get_movies(db: Session, skip: int, limit: int):
     return db.query(models.Movie).offset(skip).limit(limit).all()
 
 
-def create_movies(db: Session, movies: List[Movie]):
+def create_movies(db: Session, movies: List[MovieCreate]):
     db_movies = [models.Movie(**movie.dict()) for movie in movies]
     db.add_all(db_movies)
     db.commit()
