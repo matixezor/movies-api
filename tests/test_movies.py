@@ -3,7 +3,7 @@ from fastapi.testclient import TestClient
 from config import test_admin_password, test_admin_username, test_password, test_username
 from main import app
 from utils import get_db
-from .test_utils import override_get_db, get_token
+from .test_helpers import override_get_db, get_token
 
 app.dependency_overrides[get_db] = override_get_db
 
