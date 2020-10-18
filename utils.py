@@ -1,14 +1,15 @@
 from fastapi import Depends, HTTPException, status, Path
 from fastapi.security import OAuth2PasswordBearer
-from database import SessionLocal
 from jose import JWTError, jwt
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, date
 from typing import Optional
-import crud
-from config import SECRET_KEY, ALGORITHM
-from schemas import TokenData, User
 from passlib.context import CryptContext
 from sqlalchemy.orm import Session
+
+import crud
+from database import SessionLocal
+from config import SECRET_KEY, ALGORITHM
+from schemas import TokenData, User
 
 
 admin_text_desc = 'Only for admin users'
@@ -86,3 +87,8 @@ def get_user(user_id: int = Path(..., ge=1), db: Session = Depends(get_db)) -> U
     if not db_user:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='User not found')
     return db_user
+
+
+def get_date(str_date: str) -> date:
+    year, month, day = (int(x) for x in str_date.split('-'))
+    return date(year, month, day)
