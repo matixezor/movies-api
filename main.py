@@ -3,10 +3,12 @@ from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 from datetime import timedelta
 
-from routers import users, movies, me
+from routers import users, movies, me, purchases
 from config import ACCESS_TOKEN_EXPIRE_MINUTES
 from schemas import Token
 from utils import get_db, authenticate_user, create_access_token, get_current_user, get_admin
+from schemas import UserCreate, User
+from crud import get_user_by_email, create_user
 
 
 app = FastAPI()
@@ -34,6 +36,14 @@ async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(
     return {'access_token': access_token, 'token_type': 'bearer'}
 
 
+@app.post('/register', response_model=User, status_code=status.HTTP_201_CREATED, tags=['register'])
+def register(user: UserCreate, db: Session = Depends(get_db)):
+    if get_user_by_email(db, email=user.email):
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail='User already exists')
+    return create_user(db, user=user)
+
+
 app.include_router(me.router, prefix='/me', tags=['me'], dependencies=[Depends(get_current_user)])
 app.include_router(users.router, prefix='/users', tags=['users'], dependencies=[Depends(get_admin)])
+app.include_router(purchases.router, prefix='/purchases', tags=['purchases'], dependencies=[Depends(get_current_user)])
 app.include_router(movies.router, prefix='/movies', tags=['movies'])
