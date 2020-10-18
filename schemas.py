@@ -28,37 +28,53 @@ class UserMovie(Movie):
 
 
 class PurchaseBase(BaseModel):
-    ID: int
     start_date: date
     expiry_date: date
-    cost: int
 
     class Config:
         orm_mode = True
 
 
 class Purchase(PurchaseBase):
-    movie_list: List[MovieBase] = []
+    cost: int
+    ID: int
+    user_id: int
+
+
+class PurchaseMovie(Purchase):
+    movie_list: List[MovieCreate] = []
+
+
+class PurchaseCreate(PurchaseBase):
+    pass
 
 
 class UserBase(BaseModel):
-    ID: int
     email: str
 
     class Config:
         orm_mode = True
 
 
-class User(UserBase):
+class UserUpdate(UserBase):
     name: str
     surname: str
     phone: Optional[str] = None
     address: Optional[str] = None
+
+
+class User(UserUpdate):
     is_admin: bool
+    ID: int
+
+
+class UserCreate(UserUpdate):
+    password: str
 
 
 class UserPurchase(UserBase):
-    purchases: List[PurchaseBase] = []
+    ID: int
+    purchases: List[Purchase] = []
 
 
 class Token(BaseModel):
