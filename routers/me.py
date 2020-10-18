@@ -4,8 +4,8 @@ from sqlalchemy.orm import Session
 from datetime import date
 
 import crud
-from schemas import User, UserBase, Purchase, UserPurchase, UserMovie
-from utils import get_db, get_current_user
+from schemas import User, UserBase, PurchaseMovie, UserPurchase, UserMovie, UserUpdate
+from utils import get_db, get_current_user, get_date
 
 
 router = APIRouter()
@@ -14,6 +14,11 @@ router = APIRouter()
 @router.get('/', summary='Read info of yourself', response_model=User, status_code=status.HTTP_200_OK)
 def read_self_user(user: User = Depends(get_current_user)):
     return user
+
+
+@router.put('/', summary='Modify info of yourself', response_model=User, status_code=status.HTTP_200_OK)
+def update_self_user(updated_user: UserUpdate, user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+    return crud.update_user(db, user_id=user.ID, user=updated_user)
 
 
 @router.get(
@@ -29,7 +34,7 @@ def read_self_purchases(user: User = Depends(get_current_user)):
 @router.get(
     '/purchases/{purchase_id}',
     summary='Read full info about your purchase',
-    response_model=Purchase,
+    response_model=PurchaseMovie,
     status_code=status.HTTP_200_OK
 )
 def read_self_purchase(
@@ -44,13 +49,12 @@ def read_self_purchase(
 
 
 @router.get('/movies', summary='Read your movies', response_model=List[UserMovie], status_code=status.HTTP_200_OK)
-def read_self_movies(user: UserBase = Depends(get_current_user), db: Session = Depends(get_db)):
+def read_self_movies(user: User = Depends(get_current_user), db: Session = Depends(get_db)):
     db_movies = crud.get_user_movies(db, user_id=user.ID)
     if not db_movies:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='User movies not found')
 
     for movie in db_movies:
-        year, month, day = (int(x) for x in movie.purchase.expiry_date.split('-'))
-        movie.expired = True if date(year, month, day) < date.today() else False
+        movie.expired = True if get_date(movie.purchase.expiry_date) < date.today() else False
 
     return db_movies

@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, status, Path, HTTPException, Query
+from fastapi import APIRouter, Depends, status, Path, HTTPException, Query, Response
 from typing import List
 from schemas import Movie, MovieCreate, MovieBase
 
@@ -18,12 +18,15 @@ def read_movies(skip: int = Query(0, ge=0), limit: int = Query(100, ge=1), db: S
 @router.post(
     '/',
     response_model=List[Movie],
-    summary='Post movies',
+    summary='Create movies',
     status_code=status.HTTP_201_CREATED,
     dependencies=[Depends(get_admin)],
     description=admin_text_desc
 )
 def create_movies(movies: List[MovieCreate], db: Session = Depends(get_db)):
+    for movie in movies:
+        if crud.get_movie_by_title(db, title=movie.title):
+            movies.remove(movie)
     return crud.create_movies(db, movies=movies)
 
 
@@ -38,7 +41,7 @@ def read_movie(movie_id: int = Path(..., ge=1), db: Session = Depends(get_db)):
 @router.put(
     '/{movie_id}',
     response_model=Movie,
-    summary='Create movie',
+    summary='Modify movie',
     status_code=status.HTTP_200_OK,
     dependencies=[Depends(get_admin)],
     description=admin_text_desc
@@ -48,3 +51,17 @@ def update_movie(movie: MovieBase, movie_id: int = Path(..., ge=1), db: Session 
     if not db_movie:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='Movie not found')
     return db_movie
+
+
+@router.delete(
+    '/{movie_id}',
+    summary='Delete movie',
+    status_code=status.HTTP_204_NO_CONTENT,
+    dependencies=[Depends(get_admin)],
+    description=admin_text_desc
+)
+def delete_movie(movie_id: int = Path(..., ge=1), db: Session = Depends(get_db)):
+    db_movie = crud.delete_movie(db, movie_id=movie_id)
+    if not db_movie:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='Movie not found')
+    return Response(status_code=status.HTTP_204_NO_CONTENT)
