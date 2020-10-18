@@ -14,7 +14,7 @@ class User(Base):
     surname = Column(String, nullable=False)
     phone = Column(String)
     address = Column(String)
-    is_admin = Column(Boolean)
+    is_admin = Column(Boolean, default=False)
 
     purchases = relationship("Purchase", back_populates="user")
 
