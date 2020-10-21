@@ -18,7 +18,7 @@ def test_read_self_user():
     response = client.get('/me', headers=token)
     assert response.status_code == 200
     assert response.json() == {
-                                'ID': 1,
+                                'id': 1,
                                 'email': 'test_mail',
                                 'name': 'test_name',
                                 'surname': 'test_surname',
@@ -38,20 +38,22 @@ def test_read_self_purchases():
     response = client.get('/me/purchases', headers=token)
     assert response.status_code == 200
     assert response.json() == {
-                                'ID': 1,
                                 'email': 'test_mail',
+                                'id': 1,
                                 'purchases': [
                                     {
-                                        'ID': 1,
-                                         'start_date': '2020-10-03',
-                                         'expiry_date': '2020-10-09',
-                                         'cost': 66
-                                     },
+                                        'start_date': '2020-10-03',
+                                        'expiry_date': '2020-10-09',
+                                        'cost': 66,
+                                        'id': 1,
+                                        'user_id': 1
+                                    },
                                     {
-                                        'ID': 2,
                                         'start_date': '2020-10-14',
                                         'expiry_date': '2020-11-15',
-                                        'cost': 198
+                                        'cost': 198,
+                                        'id': 2,
+                                        'user_id': 1
                                     }
                                 ]
                             }
@@ -67,10 +69,11 @@ def test_read_self_purchase():
     response = client.get('/me/purchases/2', headers=token)
     assert response.status_code == 200
     assert response.json() == {
-                                'ID': 2,
                                 'start_date': '2020-10-14',
                                 'expiry_date': '2020-11-15',
                                 'cost': 198,
+                                'id': 2,
+                                'user_id': 1,
                                 'movie_list': [
                                     {
                                         'title': 'Venom',
@@ -100,7 +103,7 @@ def test_read_self_movies():
                                     'director': 'Henry Joost',
                                     'release_year': 2020, 'rating': 6.0,
                                     'cost_per_day': 5,
-                                    'ID': 2,
+                                    'id': 2,
                                     'expired': True
                                 },
                                 {
@@ -110,7 +113,7 @@ def test_read_self_movies():
                                     'release_year': 2020,
                                     'rating': 6.2,
                                     'cost_per_day': 6,
-                                    'ID': 3,
+                                    'id': 3,
                                     'expired': True
                                 },
                                 {
@@ -120,7 +123,7 @@ def test_read_self_movies():
                                     'release_year': None,
                                     'rating': 6.7,
                                     'cost_per_day': 6,
-                                    'ID': 5,
+                                    'id': 5,
                                     'expired': False
                                 }
                             ]

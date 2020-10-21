@@ -20,7 +20,7 @@ def test_read_users():
     assert response.status_code == 200
     assert response.json() == [
                                 {
-                                    'ID': 1,
+                                    'id': 1,
                                     'email': 'test_mail',
                                     'name': 'test_name',
                                     'surname': 'test_surname',
@@ -29,7 +29,7 @@ def test_read_users():
                                     'is_admin': True
                                 },
                                 {
-                                    'ID': 2,
+                                    'id': 2,
                                     'email': 'test_1',
                                     'name': 'test_2',
                                     'surname': 'test_3',
@@ -57,7 +57,7 @@ def test_read_users_skip_first():
     assert response.status_code == 200
     assert response.json() == [
                                 {
-                                    'ID': 2,
+                                    'id': 2,
                                     'email': 'test_1',
                                     'name': 'test_2',
                                     'surname': 'test_3',
@@ -73,7 +73,7 @@ def test_read_users_limit_one():
     assert response.status_code == 200
     assert response.json() == [
                                 {
-                                    'ID': 1,
+                                    'id': 1,
                                     'email': 'test_mail',
                                     'name': 'test_name',
                                     'surname': 'test_surname',
@@ -94,7 +94,7 @@ def test_read_user():
     response = client.get('/users/2', headers=admin_token)
     assert response.status_code == 200
     assert response.json() == {
-                                'ID': 2,
+                                'id': 2,
                                 'email': 'test_1',
                                 'name': 'test_2',
                                 'surname': 'test_3',
@@ -126,17 +126,22 @@ def test_read_user_purchases():
     response = client.get('/users/1/purchases', headers=admin_token)
     assert response.status_code == 200
     assert response.json() == {
-                                'ID': 1,
+                                'id': 1,
                                 'email': 'test_mail',
                                 'purchases': [
                                     {
-                                        'ID': 1,
                                         'start_date': '2020-10-03',
                                         'expiry_date': '2020-10-09',
-                                        'cost': 66
+                                        'cost': 66,
+                                        'id': 1,
+                                        'user_id': 1
                                     },
                                     {
-                                        'ID': 2, 'start_date': '2020-10-14', 'expiry_date': '2020-11-15', 'cost': 198
+                                        'start_date': '2020-10-14',
+                                        'expiry_date': '2020-11-15',
+                                        'cost': 198,
+                                        'id': 2,
+                                        'user_id': 1
                                     }
                                 ]
                             }
@@ -168,10 +173,11 @@ def test_read_user_purchase():
     response = client.get('/users/1/purchases/1', headers=admin_token)
     assert response.status_code == 200
     assert response.json() == {
-                                'ID': 1,
                                 'start_date': '2020-10-03',
                                 'expiry_date': '2020-10-09',
                                 'cost': 66,
+                                'id': 1,
+                                'user_id': 1,
                                 'movie_list': [
                                     {
                                         'title': 'Project Power',
@@ -196,7 +202,7 @@ def test_read_user_purchase():
 def test_read_nonexistent_user_purchase():
     response = client.get('/users/5/purchases/1', headers=admin_token)
     assert response.status_code == 404
-    assert response.json() == {'detail': 'Purchase for given user not found'}
+    assert response.json() == {'detail': 'User not found'}
 
 
 def test_read_user_nonexistent_purchase():
@@ -216,7 +222,8 @@ def test_read_user_movies():
                                     'release_year': 2020,
                                     'rating': 6.2,
                                     'cost_per_day': 6,
-                                    'ID': 3
+                                    'id': 3,
+                                    'expired': True
                                 }
                             ]
 

@@ -11,7 +11,7 @@ def get_users(db: Session, skip: int, limit: int):
 
 
 def get_user(db: Session, user_id: int):
-    return db.query(models.User).filter(models.User.ID == user_id).first()
+    return db.query(models.User).filter(models.User.id == user_id).first()
 
 
 def get_user_by_email(db: Session, email: str):
@@ -19,7 +19,7 @@ def get_user_by_email(db: Session, email: str):
 
 
 def update_user(db: Session, user_id: int, user: UserUpdate):
-    db.query(models.User).filter(models.User.ID == user_id).update(user.dict(), synchronize_session=False)
+    db.query(models.User).filter(models.User.id == user_id).update(user.dict(), synchronize_session=False)
     db.commit()
     return get_user(db, user_id=user_id)
 
@@ -44,15 +44,15 @@ def get_purchase_movies(db: Session, purchase_id: int):
     return db.query(models.Movie). \
         join(models.MovieList). \
         join(models.Purchase). \
-        filter(models.Purchase.ID == purchase_id).all()
+        filter(models.Purchase.id == purchase_id).all()
 
 
 def get_purchase(db: Session, purchase_id: int):
-    return db.query(models.Purchase).filter(models.Purchase.ID == purchase_id).first()
+    return db.query(models.Purchase).filter(models.Purchase.id == purchase_id).first()
 
 
 def create_purchase(db: Session, purchase: PurchaseCreate, user_id: int, days: int, movies: List[int]):
-    db_movies = db.query(models.Movie).filter(models.Movie.ID.in_(movies)).all()
+    db_movies = db.query(models.Movie).filter(models.Movie.id.in_(movies)).all()
     cost = 0
 
     for db_movie in db_movies:
@@ -74,7 +74,7 @@ def get_purchases(db: Session, skip: int, limit: int):
 
 def get_purchase_with_user_id(db: Session, purchase_id: int, user_id: int):
     return db.query(models.Purchase). \
-        filter(models.Purchase.ID == purchase_id, models.Purchase.user_id == user_id).first()
+        filter(models.Purchase.id == purchase_id, models.Purchase.user_id == user_id).first()
 
 
 def get_movies(db: Session, skip: int, limit: int):
@@ -91,7 +91,7 @@ def create_movies(db: Session, movies: List[MovieCreate]):
 
 
 def get_movie(db: Session, movie_id: int):
-    return db.query(models.Movie).filter(models.Movie.ID == movie_id).first()
+    return db.query(models.Movie).filter(models.Movie.id == movie_id).first()
 
 
 def get_movie_by_title(db: Session, title: str):
@@ -99,12 +99,12 @@ def get_movie_by_title(db: Session, title: str):
 
 
 def update_movie(db: Session, movie_id: int, movie: MovieBase):
-    db.query(models.Movie).filter(models.Movie.ID == movie_id).update(movie.dict(), synchronize_session=False)
+    db.query(models.Movie).filter(models.Movie.id == movie_id).update(movie.dict(), synchronize_session=False)
     db.commit()
     return get_movie(db, movie_id=movie_id)
 
 
 def delete_movie(db: Session, movie_id: int):
-    db_movie = db.query(models.Movie).filter(models.Movie.ID == movie_id).delete(synchronize_session='fetch')
+    db_movie = db.query(models.Movie).filter(models.Movie.id == movie_id).delete(synchronize_session='fetch')
     db.commit()
     return db_movie
