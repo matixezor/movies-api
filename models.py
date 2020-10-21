@@ -7,7 +7,7 @@ from database import Base
 class User(Base):
     __tablename__ = "Users"
 
-    ID = Column(Integer, primary_key=True, index=True)
+    id = Column(Integer, primary_key=True, index=True)
     email = Column(String, unique=True, index=True, nullable=False)
     password = Column(String, nullable=False)
     name = Column(String, nullable=False)
@@ -22,8 +22,8 @@ class User(Base):
 class Purchase(Base):
     __tablename__ = "Purchases"
 
-    ID = Column(Integer, primary_key=True, index=True)
-    user_id = Column(Integer, ForeignKey("Users.ID"))
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("Users.id"))
     start_date = Column(String, nullable=False)
     expiry_date = Column(String, nullable=False)
     cost = Column(Integer, nullable=False)
@@ -35,14 +35,14 @@ class Purchase(Base):
 class MovieList(Base):
     __tablename__ = "MoviesLists"
 
-    purchase_id = Column(Integer, ForeignKey("Purchases.ID"), primary_key=True)
-    movie_id = Column(Integer, ForeignKey("Movies.ID"), primary_key=True)
+    purchase_id = Column(Integer, ForeignKey("Purchases.id"), primary_key=True)
+    movie_id = Column(Integer, ForeignKey("Movies.id"), primary_key=True)
 
 
 class Movie(Base):
     __tablename__ = "Movies"
 
-    ID = Column(Integer, primary_key=True)
+    id = Column(Integer, primary_key=True)
     title = Column(String, unique=True, nullable=False)
     director = Column(String)
     release_year = Column(Integer)

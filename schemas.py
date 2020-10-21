@@ -20,7 +20,7 @@ class MovieCreate(MovieBase):
 
 
 class Movie(MovieBase):
-    ID: int
+    id: int
 
 
 class UserMovie(Movie):
@@ -37,7 +37,7 @@ class PurchaseBase(BaseModel):
 
 class Purchase(PurchaseBase):
     cost: int
-    ID: int
+    id: int
     user_id: int
 
 
@@ -65,15 +65,19 @@ class UserUpdate(UserBase):
 
 class User(UserUpdate):
     is_admin: bool
-    ID: int
+    id: int
 
 
 class UserCreate(UserUpdate):
     password: str
 
 
+class UserAdminCreate(UserCreate):
+    is_admin: Optional[bool] = None
+
+
 class UserPurchase(UserBase):
-    ID: int
+    id: int
     purchases: List[Purchase] = []
 
 
