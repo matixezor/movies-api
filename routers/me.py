@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 from datetime import date
 
 import crud
-from schemas import User, UserBase, PurchaseMovie, UserPurchase, UserMovie, UserUpdate
+from schemas import User, PurchaseMovie, UserPurchase, UserMovie, UserUpdate
 from utils import get_db, get_current_user, get_date
 
 
@@ -13,12 +13,22 @@ router = APIRouter()
 
 @router.get('/', summary='Read info of yourself', response_model=User, status_code=status.HTTP_200_OK)
 def read_self_user(user: User = Depends(get_current_user)):
+    """
+    Read your information
+    """
     return user
 
 
 @router.put('/', summary='Modify info of yourself', response_model=User, status_code=status.HTTP_200_OK)
 def update_self_user(updated_user: UserUpdate, user: User = Depends(get_current_user), db: Session = Depends(get_db)):
-    return crud.update_user(db, user_id=user.ID, user=updated_user)
+    """
+    Modify your information with given data:
+    - **email**: required
+    - **name**: required
+    - **phone**: optional
+    - **address*: optional
+    """
+    return crud.update_user(db, user_id=user.id, user=updated_user)
 
 
 @router.get(
@@ -28,6 +38,9 @@ def update_self_user(updated_user: UserUpdate, user: User = Depends(get_current_
     status_code=status.HTTP_200_OK
 )
 def read_self_purchases(user: User = Depends(get_current_user)):
+    """
+    Read a list of your purchases
+    """
     return user
 
 
@@ -42,7 +55,10 @@ def read_self_purchase(
         user: User = Depends(get_current_user),
         db: Session = Depends(get_db)
 ):
-    db_purchase = crud.get_purchase_with_user_id(db, purchase_id=purchase_id, user_id=user.ID)
+    """
+    Read your purchase
+    """
+    db_purchase = crud.get_purchase_with_user_id(db, purchase_id=purchase_id, user_id=user.id)
     if not db_purchase:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='Purchase not found')
     return db_purchase
@@ -50,7 +66,10 @@ def read_self_purchase(
 
 @router.get('/movies', summary='Read your movies', response_model=List[UserMovie], status_code=status.HTTP_200_OK)
 def read_self_movies(user: User = Depends(get_current_user), db: Session = Depends(get_db)):
-    db_movies = crud.get_user_movies(db, user_id=user.ID)
+    """
+    Read your movies
+    """
+    db_movies = crud.get_user_movies(db, user_id=user.id)
     if not db_movies:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='User movies not found')
 
