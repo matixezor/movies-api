@@ -9,9 +9,10 @@ from schemas import Token
 from utils import get_db, authenticate_user, create_access_token, get_current_user, get_admin
 from schemas import UserCreate, User
 from crud import get_user_by_email, create_user
+from metadata import tags_metadata
 
 
-app = FastAPI()
+app = FastAPI(openapi_tags=tags_metadata)
 
 
 @app.post('/token', response_model=Token, tags=['token'])
@@ -38,6 +39,15 @@ async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(
 
 @app.post('/register', response_model=User, status_code=status.HTTP_201_CREATED, tags=['register'])
 def register(user: UserCreate, db: Session = Depends(get_db)):
+    """
+    Register with all the information:
+    - **email**: required
+    - **name**: required
+    - **surname**: required
+    - **phone**: optional
+    - **address**: optional
+    - **password**: required
+    """
     if get_user_by_email(db, email=user.email):
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail='User already exists')
     return create_user(db, user=user)
