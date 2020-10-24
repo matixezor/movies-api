@@ -1,6 +1,6 @@
 SECRET_KEY = ''
-ALGORITHM = ''
-ACCESS_TOKEN_EXPIRE_MINUTES = 0
+ALGORITHM = 'HS256'
+ACCESS_TOKEN_EXPIRE_MINUTES = 30
 test_admin_password = ''
 test_admin_username = ''
 test_password = ''
