@@ -20,6 +20,6 @@ To play around with it use the acc:
  * password: test
 ## Setup
 The API is written in Python 3.8.1 ant there are some dependencies. Run this command to install them: ``pip install -r /path/to/requirements.txt``.  
-To run it locally use ``uvicorn main:app``.
+You need to fill ``SECRET_KEY`` in config file. To get that key use ``openssl rand -hex 32`` command. To run it locally use ``uvicorn main:app``. 
 ## Tests
 There are some tests to ensure the endpoints behave how they should even if the code is changed. To run them simply use ``pytests`` command.
