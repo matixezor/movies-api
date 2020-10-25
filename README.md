@@ -4,7 +4,7 @@ An API to simulate the backend system of a movie renting service.
 1. [About](#about)
 1. [Database](#database)
 1. [Docs](#docs)
-1. [Setup](#installation)
+1. [Setup](#setup)
 1. [Tests](#tests)
 ## About
 An API to simulate the backend system of a movie renting service. Written using FAST API.  
@@ -14,7 +14,8 @@ Some endpoints require admin permissions.
 The database is represented by this ERD diagram. API uses a sqlite database.  
 ![database picture](https://i.imgur.com/p01BpvS.png)
 ## Docs
-The docs are under this link: . Here you can also test the api right away.  
+Click here to see the [docs](https://matixezor-movies-api.herokuapp.com/docs). I think the docs are self-explanatory.  
+There you can also play around with the api right away.  
 To play around with it use the acc:
  * username: test_mail
  * password: test
