@@ -17,7 +17,6 @@ token = get_token(test_username, test_password, client)
 def test_read_movies():
     response = client.get('/movies')
     assert response.status_code == 200
-    print(response.json())
     assert response.json() == [
         {'title': 'Joker', 'genre': 'Crime', 'director': 'Todd Phillips', 'release_year': 2019, 'rating': 8.5,
          'cost_per_day': 7, 'id': 1},

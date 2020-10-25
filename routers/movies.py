@@ -18,7 +18,8 @@ def read_movies(skip: int = Query(0, ge=0), limit: int = Query(100, ge=1), db: S
     - **skip**: how many records to skip
     - **limit**: how many records to read
     """
-    return crud.get_movies(db, skip=skip, limit=limit)
+    db_movies = crud.get_movies(db, skip=skip, limit=limit)
+    return db_movies
 
 
 @router.post(
